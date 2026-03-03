@@ -22,7 +22,7 @@ body {
     padding: 20px;
 }
 
-/* Стили авторизации */
+/* Стеклянная карточка авторизации */
 .glass-card {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(20px);
@@ -76,8 +76,10 @@ input:focus { border-color: #30a1ff; background: rgba(255, 255, 255, 0.08); }
 .btn-secondary { background: transparent; color: rgba(255,255,255,0.6); }
 
 .bottom-link { margin-top: 25px; font-size: 14px; color: rgba(255,255,255,0.4); }
-.bottom-link span, .forgot-password-link { color: #30a1ff; cursor: pointer; text-decoration: none; font-weight: 500; }
-.forgot-password-link { display: block; text-align: right; font-size: 12px; margin-bottom: 15px; }
+.bottom-link span { color: #30a1ff; cursor: pointer; font-weight: 500; }
+
+.forgot-link-container { text-align: right; margin-bottom: 15px; }
+.forgot-password-link { color: #30a1ff; font-size: 12px; cursor: pointer; font-weight: 500; }
 
 /* Код подтверждения */
 .code-container { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
@@ -134,13 +136,12 @@ input:focus { border-color: #30a1ff; background: rgba(255, 255, 255, 0.08); }
 
 .chat-window { flex: 1; display: flex; flex-direction: column; }
 .chat-header { padding: 20px; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.messages-area { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+.messages-area { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto;}
 .msg { padding: 12px 16px; border-radius: 15px; font-size: 14px; max-width: 80%; }
 .msg.incoming { background: rgba(255,255,255,0.05); align-self: flex-start; }
 
 .message-input-bar { padding: 20px; display: flex; gap: 10px; }
-.message-input-bar input { flex: 1; }
-.send-btn { width: 50px; background: #30a1ff; border: none; border-radius: 12px; color: white; cursor: pointer; }
+.message-input-bar input { flex: 1; margin: 0; }
+.send-btn { width: 50px; background: #30a1ff; border: none; border-radius: 12px; color: white; cursor: pointer; font-size: 18px; }
 
 .logout-btn { margin: 20px; padding: 12px; background: rgba(255, 76, 76, 0.1); color: #ff4c4c; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; }
-                                 
