@@ -1,142 +1,165 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Социальная Сеть</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+// Переключение экранов
+function goToScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+    
+    if(screenId === 'screen-code') {
+        setTimeout(() => document.querySelector('.code-input').focus(), 100);
+    }
+}
 
-    <div class="glass-card" id="auth-container">
-        <img src="https://i.imgur.com/Sx7pmLM.png" alt="Логотип" class="logo">
+// Вход в профиль
+function enterApp(email) {
+    const userEmail = email || localStorage.getItem('currentUser');
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('screen-app').classList.add('active');
+    document.getElementById('display-user-email').textContent = userEmail;
+}
 
-        <div id="screen-register" class="screen active">
-            <h2>Создать аккаунт</h2>
-            <p class="subtitle">Присоединяйся в Marglet</p>
-            <form id="register-form">
-                <div class="input-group">
-                    <input type="email" id="reg-email" placeholder="Электронная почта" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="reg-password" placeholder="Придумайте пароль" minlength="6" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-            </form>
-            <div class="bottom-link">
-                Уже есть аккаунт? <span onclick="goToScreen('screen-login')">Войти</span>
-            </div>
-        </div>
+// Выход из аккаунта
+function logout() {
+    localStorage.removeItem('currentUser');
+    document.getElementById('auth-container').style.display = 'block';
+    document.getElementById('screen-app').classList.remove('active');
+    goToScreen('screen-login');
+}
 
-        <div id="screen-login" class="screen">
-            <h2>С возвращением!</h2>
-            <p class="subtitle">Рады видеть вас снова</p>
-            <form id="login-form">
-                <div class="input-group">
-                    <input type="email" id="login-email" placeholder="Электронная почта" required>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="login-password" placeholder="Пароль" required>
-                </div>
-                <div class="forgot-password-link" onclick="openForgotScreen()">Забыли пароль?</div>
-                <button type="submit" class="btn btn-primary">Войти</button>
-            </form>
-            <div class="bottom-link">
-                Нет аккаунта? <span onclick="goToScreen('screen-register')">Создать</span>
-            </div>
-        </div>
+// РЕГИСТРАЦИЯ (Сохранение)
+document.getElementById('register-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-password').value;
+    
+    let users = JSON.parse(localStorage.getItem('mySocialUsers')) || [];
+    
+    if (users.find(u => u.email === email)) {
+        alert('Эта почта уже занята!');
+        return;
+    }
+    
+    users.push({ email, password });
+    localStorage.setItem('mySocialUsers', JSON.stringify(users));
+    localStorage.setItem('currentUser', email);
+    
+    goToScreen('screen-code');
+});
 
-        <div id="screen-forgot" class="screen">
-            <h2>Восстановление</h2>
-            <p class="subtitle">Введите почту вашего аккаунта</p>
-            <form id="forgot-form">
-                <div class="input-group">
-                    <input type="email" id="forgot-email" placeholder="Электронная почта" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Сбросить пароль</button>
-            </form>
-            <div class="bottom-link">
-                <span onclick="goToScreen('screen-login')">Вернуться назад</span>
-            </div>
-        </div>
+// ВХОД (Проверка)
+document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    let users = JSON.parse(localStorage.getItem('mySocialUsers')) || [];
+    const user = users.find(u => u.email === email && u.password === password);
+    
+    if (user) {
+        localStorage.setItem('currentUser', email);
+        enterApp(email);
+    } else {
+        alert('Неверный логин или пароль!');
+    }
+});
 
-        <div id="screen-code" class="screen">
-            <h2>Подтверждение</h2>
-            <p class="subtitle">Мы отправили код на вашу почту</p>
-            <div class="code-container">
-                <input type="text" class="code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-                <input type="text" class="code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric">
-            </div>
-            <div class="bottom-link">
-                <span onclick="goToScreen('screen-register')">Назад</span>
-            </div>
-        </div>
+// ВОССТАНОВЛЕНИЕ ПАРОЛЯ
+function openForgotScreen() {
+    const currentInput = document.getElementById('login-email').value;
+    document.getElementById('forgot-email').value = currentInput;
+    goToScreen('screen-forgot');
+}
 
-        <div id="screen-phone" class="screen">
-            <h2>Безопасность</h2>
-            <p class="subtitle">Привяжите номер телефона</p>
-            <form id="phone-form">
-                <div class="phone-input-container">
-                    <div class="country-picker" id="country-picker-trigger">
-                        <span id="current-flag">🇷🇺</span>
-                        <span id="current-code">+7</span>
-                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="white" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    </div>
-                    <input type="tel" id="phone-field" placeholder="000 000 00 00" required>
-                    <div class="country-dropdown" id="country-dropdown">
-                        <div class="search-box"><input type="text" id="country-search" placeholder="Поиск страны..."></div>
-                        <ul class="country-list" id="country-list"></ul>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Привязать номер</button>
-                <button type="button" class="btn btn-secondary" onclick="enterApp()">Пропустить</button>
-            </form>
-        </div>
-    </div>
+document.getElementById('forgot-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value;
+    let users = JSON.parse(localStorage.getItem('mySocialUsers')) || [];
+    
+    if (users.find(u => u.email === email)) {
+        goToScreen('screen-code'); // Имитация: отправляем на ввод кода
+    } else {
+        alert('На данную почту не зарегистрирован аккаунт');
+    }
+});
 
-    <div id="screen-app" class="app-container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="user-avatar-main"></div>
-                <div class="user-info">
-                    <span id="display-user-email">User</span>
-                    <small>Online</small>
-                </div>
-            </div>
-            <div class="chat-list">
-                <div class="chat-item active">
-                    <div class="avatar"></div>
-                    <div class="chat-details">
-                        <b>Команда Marglet</b>
-                        <p>Добро пожаловать в сеть!</p>
-                    </div>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()">Выйти из аккаунта</button>
-        </aside>
-        <main class="chat-window">
-            <div class="chat-header">Диалог с поддержкой</div>
-            <div class="messages-area" id="messages-box">
-                <div class="msg incoming">Привет! Теперь у тебя есть свой аккаунт. Это визуальный прототип твоей соцсети.</div>
-            </div>
-            <div class="message-input-bar">
-                <input type="text" placeholder="Написать сообщение...">
-                <button class="send-btn">➔</button>
-            </div>
-        </main>
-    </div>
+// ПРИВЯЗКА ТЕЛЕФОНА
+document.getElementById('phone-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    enterApp();
+});
 
-    <script src="script.js"></script>
-</body>
-</html>
+// ЛОГИКА КОДА (Прыжки по ячейкам)
+const codeInputs = document.querySelectorAll('.code-input');
+codeInputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        if (e.target.value !== '' && index < codeInputs.length - 1) {
+            codeInputs[index + 1].focus();
+        }
+        checkCode();
+    });
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+            codeInputs[index - 1].focus();
+        }
+    });
+});
+
+function checkCode() {
+    const code = Array.from(codeInputs).map(i => i.value).join('');
+    if (code.length === 4) {
+        codeInputs.forEach(i => i.classList.add('success'));
+        setTimeout(() => {
+            codeInputs.forEach(i => { i.classList.remove('success'); i.value = ''; });
+            // Если мы из восстановления - идем в приложение, если нет - на телефон
+            const isForgot = document.getElementById('screen-forgot').classList.contains('active');
+            isForgot ? enterApp() : goToScreen('screen-phone');
+        }, 800);
+    }
+}
+
+// СПИСОК СТРАН И ПОИСК
+const countries = [
+    { name: "Россия", code: "+7", flag: "🇷🇺" },
+    { name: "Украина", code: "+380", flag: "🇺🇦" },
+    { name: "Беларусь", code: "+375", flag: "🇧🇾" },
+    { name: "Казахстан", code: "+7", flag: "🇰🇿" },
+    { name: "США", code: "+1", flag: "🇺🇸" },
+    { name: "Германия", code: "+49", flag: "🇩🇪" }
+];
+
+const countryTrigger = document.getElementById('country-picker-trigger');
+const countryDropdown = document.getElementById('country-dropdown');
+const countryList = document.getElementById('country-list');
+const countrySearch = document.getElementById('country-search');
+
+function renderCountries(filter = '') {
+    countryList.innerHTML = '';
+    countries.filter(c => c.name.toLowerCase().includes(filter.toLowerCase())).forEach(c => {
+        const li = document.createElement('li');
+        li.className = 'country-item';
+        li.innerHTML = `<span>${c.flag}</span> <span>${c.name}</span> <span style="margin-left:auto; opacity:0.5">${c.code}</span>`;
+        li.onclick = () => {
+            document.getElementById('current-flag').textContent = c.flag;
+            document.getElementById('current-code').textContent = c.code;
             countryDropdown.classList.remove('show');
         };
         countryList.appendChild(li);
     });
 }
 
-countryPickerTrigger.onclick = (e) => { e.stopPropagation(); countryDropdown.classList.toggle('show'); };
+countryTrigger.onclick = (e) => {
+    e.stopPropagation();
+    countryDropdown.classList.toggle('show');
+};
+
+countrySearch.oninput = (e) => renderCountries(e.target.value);
+
 document.addEventListener('click', () => countryDropdown.classList.remove('show'));
+
 renderCountries();
+
+// Проверка сессии при загрузке
+window.onload = () => {
+    if (localStorage.getItem('currentUser')) {
+        enterApp();
+    }
+};
