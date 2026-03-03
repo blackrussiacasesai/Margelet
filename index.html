@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Социальная Сеть</title>
+    <title>Социальная Сеть - Marglet</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -38,7 +38,9 @@
                 <div class="input-group">
                     <input type="password" id="login-password" placeholder="Пароль" required>
                 </div>
-                <div class="forgot-password-link" onclick="openForgotScreen()">Забыли пароль?</div>
+                <div class="forgot-link-container">
+                    <span class="forgot-password-link" onclick="openForgotScreen()">Забыли пароль?</span>
+                </div>
                 <button type="submit" class="btn btn-primary">Войти</button>
             </form>
             <div class="bottom-link">
@@ -48,7 +50,7 @@
 
         <div id="screen-forgot" class="screen">
             <h2>Восстановление</h2>
-            <p class="subtitle">Введите почту вашего аккаунта</p>
+            <p class="subtitle">Введите почту для сброса пароля</p>
             <form id="forgot-form">
                 <div class="input-group">
                     <input type="email" id="forgot-email" placeholder="Электронная почта" required>
@@ -86,7 +88,9 @@
                     </div>
                     <input type="tel" id="phone-field" placeholder="000 000 00 00" required>
                     <div class="country-dropdown" id="country-dropdown">
-                        <div class="search-box"><input type="text" id="country-search" placeholder="Поиск страны..."></div>
+                        <div class="search-box">
+                            <input type="text" id="country-search" placeholder="Поиск страны...">
+                        </div>
                         <ul class="country-list" id="country-list"></ul>
                     </div>
                 </div>
@@ -109,20 +113,20 @@
                 <div class="chat-item active">
                     <div class="avatar"></div>
                     <div class="chat-details">
-                        <b>Команда Marglet</b>
-                        <p>Добро пожаловать в сеть!</p>
+                        <b>Поддержка Marglet</b>
+                        <p>Рады вас видеть!</p>
                     </div>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()">Выйти из аккаунта</button>
+            <button class="logout-btn" onclick="logout()">Выйти</button>
         </aside>
         <main class="chat-window">
-            <div class="chat-header">Диалог с поддержкой</div>
+            <div class="chat-header">Чат с поддержкой</div>
             <div class="messages-area" id="messages-box">
-                <div class="msg incoming">Привет! Теперь у тебя есть свой аккаунт. Это визуальный прототип твоей соцсети.</div>
+                <div class="msg incoming">Добро пожаловать в вашу личную социальную сеть! Теперь ваши данные сохраняются.</div>
             </div>
             <div class="message-input-bar">
-                <input type="text" placeholder="Написать сообщение...">
+                <input type="text" placeholder="Напишите сообщение...">
                 <button class="send-btn">➔</button>
             </div>
         </main>
