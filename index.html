@@ -38,7 +38,7 @@
                 <div class="input-group">
                     <input type="password" id="login-password" placeholder="Пароль" required>
                 </div>
-                <span class="forgot-password" onclick="openForgotScreen()">Забыли пароль?</span>
+                <div class="forgot-password-link" onclick="openForgotScreen()">Забыли пароль?</div>
                 <button type="submit" class="btn btn-primary">Войти</button>
             </form>
             <div class="bottom-link">
@@ -48,7 +48,7 @@
 
         <div id="screen-forgot" class="screen">
             <h2>Восстановление</h2>
-            <p class="subtitle" id="forgot-subtitle">Введите почту для сброса</p>
+            <p class="subtitle">Введите почту вашего аккаунта</p>
             <form id="forgot-form">
                 <div class="input-group">
                     <input type="email" id="forgot-email" placeholder="Электронная почта" required>
@@ -99,25 +99,31 @@
     <div id="screen-app" class="app-container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="user-avatar"></div>
-                <span id="display-user-email">User</span>
+                <div class="user-avatar-main"></div>
+                <div class="user-info">
+                    <span id="display-user-email">User</span>
+                    <small>Online</small>
+                </div>
             </div>
             <div class="chat-list">
                 <div class="chat-item active">
                     <div class="avatar"></div>
-                    <div class="chat-info"><b>Поддержка</b><p>Добро пожаловать!</p></div>
+                    <div class="chat-details">
+                        <b>Команда Marglet</b>
+                        <p>Добро пожаловать в сеть!</p>
+                    </div>
                 </div>
             </div>
-            <button class="logout-btn" onclick="logout()">Выйти</button>
+            <button class="logout-btn" onclick="logout()">Выйти из аккаунта</button>
         </aside>
         <main class="chat-window">
-            <div class="chat-header">Чат с поддержкой</div>
-            <div class="messages" id="messages-box">
-                <div class="message incoming">Привет! Рады видеть тебя в нашей сети.</div>
+            <div class="chat-header">Диалог с поддержкой</div>
+            <div class="messages-area" id="messages-box">
+                <div class="msg incoming">Привет! Теперь у тебя есть свой аккаунт. Это визуальный прототип твоей соцсети.</div>
             </div>
-            <div class="chat-input-area">
-                <input type="text" placeholder="Напишите сообщение...">
-                <button>✉</button>
+            <div class="message-input-bar">
+                <input type="text" placeholder="Написать сообщение...">
+                <button class="send-btn">➔</button>
             </div>
         </main>
     </div>
