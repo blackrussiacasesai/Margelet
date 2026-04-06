@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marglet</title>
+    <link rel="icon" type="image/png" href="icons/ymusic.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        if (localStorage.getItem('currentUserEmail')) {
+            document.documentElement.classList.add('logged-in');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js" defer></script>
+    <script src="supabase-online-system.js" defer></script>
+    <script src="script.js" defer></script>
+
+    <script>
+        if (localStorage.getItem('currentUserEmail')) {
+            document.documentElement.classList.add('logged-in');
+        }
+    </script>
+</head>
+<body>
+    <!-- Экран профиля -->
+    <div id="screen-profile" class="screen">
+        <div class="profile-menu-container">
+            <button class="profile-menu-btn" id="profile-menu-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="1"/>
+                    <circle cx="12" cy="5" r="1"/>
+                    <circle cx="12" cy="19" r="1"/>
+                </svg>
+            </button>
+            <div class="profile-dropdown-menu" id="profile-dropdown-menu">
+                <div class="profile-dropdown-item logout-item" id="logout-from-menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                    </svg>
+                    <span>Выйти из аккаунта</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-content-glass no-edge-padding">
+            <div class="avatar-section-glass">
+                <div class="avatar-wrapper-glass">
+                    <div class="avatar-glow" id="avatar-glow"></div>
+                    <div id="profile-avatar-display" class="profile-avatar-glass"></div>
+                    <button id="change-avatar-btn" class="avatar-edit-btn-glass">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </button>
+                </div>
+                <input type="file" id="avatar-upload" accept="image/*" style="display:none;">
+            </div>
+            <div class="profile-stories-section" id="profile-stories-wrapper">
+                <div class="stories-title">Истории</div>
+                <div class="stories-list" id="profile-stories-list">
+                    <div class="stories-empty">Нет историй</div>
+                </div>
+            </div>
+        </div>
+        <input type="file" id="profile-story-upload" accept="image/*" style="display:none;">
+    </div>
+
+    <!-- Экран редактирования профиля -->
+    <div id="screen-edit-profile" class="screen profile-editor-v4">
+        <div class="edit-profile-content editor-v4-scroll">
+            <section class="editor-v4-flow" aria-label="Данные профиля">
+                <div class="editor-v4-row">
+                    <label class="edit-form-label" for="edit-display-name">Отображаемое имя</label>
+                    <input type="text" id="edit-display-name" class="edit-form-input" placeholder="Как вас зовут" maxlength="30">
+                </div>
+
+                <div class="editor-v4-row">
+                    <label class="edit-form-label" for="edit-username">Username</label>
+                    <div class="edit-username-row editor-v4-username-row">
+                        <input type="text" id="edit-username" class="edit-form-input" placeholder="@username" maxlength="30">
+                        <button type="button" class="edit-inline-btn" id="edit-generate-username-btn">Авто</button>
+                    </div>
+                    <div class="edit-field-hint" id="edit-username-hint">Только латиница, цифры, _ и .</div>
+                </div>
+
+                <div class="editor-v4-row">
+                    <label class="edit-form-label" for="edit-status">О себе</label>
+                    <div class="editor-v4-textarea-wrap">
+                        <textarea id="edit-status" class="edit-form-textarea" placeholder="Расскажите о себе..." maxlength="100" rows="3"></textarea>
+                        <span class="edit-counter editor-v4-counter-inside" id="edit-status-counter">0/100</span>
+                    </div>
+                </div>
+
+                <div class="editor-v4-inline-split">
+                    <div class="editor-v4-row">
+                        <label class="edit-form-label" for="edit-phone">Номер телефона</label>
+                        <div class="edit-phone-container editor-v4-phone-row">
+                            <div class="edit-country-picker" id="edit-country-picker" aria-label="Код страны">
+                                <span id="edit-current-flag">RU</span>
+                                <span id="edit-current-code">+7</span>
+                            </div>
+                            <input type="tel" id="edit-phone" class="edit-form-input edit-phone-input" placeholder="(999) 999-99-99" inputmode="numeric" autocomplete="tel-national">
+                        </div>
+                    </div>
+                    <div class="editor-v4-row">
+                        <label class="edit-form-label" for="edit-birthday">Дата рождения</label>
+                        <input type="date" id="edit-birthday" class="edit-form-input">
+                    </div>
+                </div>
+
+                <div class="editor-v4-row">
+                    <label class="edit-form-label" for="edit-email-visibility">Кто видит мою почту</label>
+                    <input type="hidden" id="edit-email-visibility" value="contacts">
+                    <div class="edit-visibility-switch" id="edit-email-visibility-switch" role="group" aria-label="Кто видит мою почту">
+                        <button type="button" class="edit-visibility-option active" data-value="contacts">Только контакты</button>
+                        <button type="button" class="edit-visibility-option" data-value="nobody">Никто</button>
+                    </div>
+                </div>
+
+                <div class="editor-v4-row">
+                    <label class="edit-form-label" for="glow-color-options-edit">Цвет свечения</label>
+                    <div class="glow-color-options" id="glow-color-options-edit">
+                        <div class="glow-color-option" data-color="gradient" style="background: linear-gradient(135deg, #ff5e98, #8b41df, #30a1ff);"></div>
+                        <div class="glow-color-option" data-color="pink" style="background: #ff5e98;"></div>
+                        <div class="glow-color-option" data-color="purple" style="background: #8b41df;"></div>
+                        <div class="glow-color-option" data-color="blue" style="background: #30a1ff;"></div>
+                        <div class="glow-color-option" data-color="green" style="background: #00e676;"></div>
+                        <div class="glow-color-option" data-color="orange" style="background: #ff9800;"></div>
+                        <div class="glow-color-option" data-color="red" style="background: #f44336;"></div>
+                        <div class="glow-color-option" data-color="cyan" style="background: #00bcd4;"></div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <div class="edit-bottom-actions editor-v4-actions">
+            <button type="button" class="edit-bottom-btn secondary" id="edit-cancel-bottom-btn">Отмена</button>
+            <button type="button" class="edit-bottom-btn primary" id="edit-save-bottom-btn">Сохранить профиль</button>
+        </div>
+    </div>
+
+    <!-- Экран сервисов -->
+    <div id="screen-services" class="screen">
+        <div class="services-header">Наши сервисы</div>
+        <div class="services-grid">
+            <div class="service-card" data-service="wmusic" data-url="https://getadminbr.github.io/WMusic/">
+                <div class="service-icon">
+                    <img src="https://i.postimg.cc/kG9xcMWF/9b959507-edd9-4bf7-b457-9f0862f9dd71.jpg" alt="W Music" class="service-icon-img">
+                </div>
+                <span>W Music</span>
+            </div>
+            <div class="service-card" data-service="forcepay" data-url="https://t.me/ForcePay">
+                <div class="service-icon">
+                    <img src="https://i.postimg.cc/CLnMw3XL/photo-5429330530848673532-c.jpg" alt="ForcePay" class="service-icon-img">
+                </div>
+                <span>ForcePay</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-notifications" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section">
+                <div class="section-title">Уведомления</div>
+                <div class="notification-toggle-list">
+                    <label class="notification-toggle-item" for="notif-send-sound">
+                        <div class="notification-toggle-text">
+                            <span>Звук отправки</span>
+                            <span class="action-button-desc">Проигрывать звук при отправке сообщения</span>
+                        </div>
+                        <input type="checkbox" id="notif-send-sound" class="notification-toggle-input" checked>
+                        <span class="notification-toggle-switch"></span>
+                    </label>
+                    <label class="notification-toggle-item" for="notif-incoming-sound">
+                        <div class="notification-toggle-text">
+                            <span>Звук входящих</span>
+                            <span class="action-button-desc">Звук при новых сообщениях</span>
+                        </div>
+                        <input type="checkbox" id="notif-incoming-sound" class="notification-toggle-input" checked>
+                        <span class="notification-toggle-switch"></span>
+                    </label>
+                    <label class="notification-toggle-item" for="notif-push-enabled">
+                        <div class="notification-toggle-text">
+                            <span>Push-уведомления</span>
+                            <span class="action-button-desc">Показывать системные уведомления</span>
+                        </div>
+                        <input type="checkbox" id="notif-push-enabled" class="notification-toggle-input" checked>
+                        <span class="notification-toggle-switch"></span>
+                    </label>
+                    <label class="notification-toggle-item" for="notif-vibration-enabled">
+                        <div class="notification-toggle-text">
+                            <span>Вибрация</span>
+                            <span class="action-button-desc">Вибро-отклик на мобильных</span>
+                        </div>
+                        <input type="checkbox" id="notif-vibration-enabled" class="notification-toggle-input">
+                        <span class="notification-toggle-switch"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-devices" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section">
+                <div class="section-title">Устройства в аккаунте</div>
+                <div id="devices-list" class="devices-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-languages" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section">
+                <div class="section-title">Язык</div>
+                <div class="devices-list">
+                    <button type="button" class="language-option-btn" id="lang-ru-btn"><span class="language-flag" aria-hidden="true">RU</span><span class="language-label">Русский</span></button>
+                    <button type="button" class="language-option-btn" id="lang-en-btn"><span class="language-flag" aria-hidden="true">EN</span><span class="language-label">English</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-wallet" class="screen">
+        <div class="settings-content notifications-content wallet-screen-content no-edge-padding">
+            <div class="settings-section wallet-hero-card">
+                <div class="wallet-hero-top-row">
+                    <div class="section-title">Кошелек</div>
+                    <div class="wallet-hero-controls">
+                        <div class="wallet-currency-switch" role="tablist" aria-label="Валюта кошелька">
+                            <button type="button" class="wallet-currency-btn active" data-currency="RUB">RUB</button>
+                            <button type="button" class="wallet-currency-btn" data-currency="USD">USD</button>
+                        </div>
+                        <button type="button" id="wallet-open-settings" class="wallet-hero-settings-btn" aria-label="Настройки кошелька" title="Настройки кошелька">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="5" r="1"/>
+                                <circle cx="12" cy="12" r="1"/>
+                                <circle cx="12" cy="19" r="1"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="wallet-balance" id="wallet-balance-amount" data-rub="12450" data-usd-rate="92.4">12 450 ₽</div>
+                <div class="wallet-actions">
+                    <button type="button" class="wallet-action-btn" id="wallet-action-send">
+                        <span class="wallet-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16,30 C8.268,30 2,23.73 2,16 C2,8.27 8.268,2 16,2 C23.732,2 30,8.27 30,16 C30,23.73 23.732,30 16,30 Z M16,0 C7.163,0 0,7.16 0,16 C0,24.84 7.163,32 16,32 C24.837,32 32,24.84 32,16 C32,7.16 24.837,0 16,0 Z M16.879,9.46 C16.639,9.22 16.311,9.15 16,9.21 C15.689,9.15 15.361,9.22 15.121,9.46 L9.465,15.12 C9.074,15.51 9.074,16.14 9.465,16.54 C9.854,16.93 10.488,16.93 10.879,16.54 L15,12.41 L15,23 C15,23.55 15.447,24 16,24 C16.553,24 17,23.55 17,23 L17,12.41 L21.121,16.54 C21.512,16.93 22.145,16.93 22.535,16.54 C22.926,16.14 22.926,15.51 22.535,15.12 L16.879,9.46 Z"/>
+                            </svg>
+                        </span>
+                        <span class="wallet-action-label">Отправить</span>
+                    </button>
+                    <button type="button" class="wallet-action-btn is-disabled" id="wallet-action-topup" disabled aria-disabled="true" title="Раздел временно недоступен">
+                        <span class="wallet-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16,30 C8.268,30 2,23.73 2,16 C2,8.27 8.268,2 16,2 C23.732,2 30,8.27 30,16 C30,23.73 23.732,30 16,30 Z M16,0 C7.163,0 0,7.16 0,16 C0,24.84 7.163,32 16,32 C24.837,32 32,24.84 32,16 C32,7.16 24.837,0 16,0 Z M22,15 L17,15 L17,10 C17,9.45 16.553,9 16,9 C15.447,9 15,9.45 15,10 L15,15 L10,15 C9.447,15 9,15.45 9,16 C9,16.55 9.447,17 10,17 L15,17 L15,22 C15,22.55 15.447,23 16,23 C16.553,23 17,22.55 17,22 L17,17 L22,17 C22.553,17 23,16.55 23,16 C23,15.45 22.553,15 22,15 Z"/>
+                            </svg>
+                        </span>
+                        <span class="wallet-action-label">Пополнить</span>
+                    </button>
+                    <button type="button" class="wallet-action-btn is-disabled" id="wallet-action-withdraw" disabled aria-disabled="true" title="Раздел временно недоступен">
+                        <span class="wallet-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16,30 C8.268,30 2,23.73 2,16 C2,8.27 8.268,2 16,2 C23.732,2 30,8.27 30,16 C30,23.73 23.732,30 16,30 Z M16,0 C7.163,0 0,7.16 0,16 C0,24.84 7.163,32 16,32 C24.837,32 32,24.84 32,16 C32,7.16 24.837,0 16,0 Z M21.121,15.46 L17,19.59 L17,9 C17,8.45 16.553,8 16,8 C15.448,8 15,8.45 15,9 L15,19.59 L10.879,15.46 C10.488,15.07 9.855,15.07 9.465,15.46 C9.074,15.86 9.074,16.49 9.465,16.88 L15.121,22.54 C15.361,22.78 15.689,22.85 16,22.79 C16.311,22.85 16.639,22.78 16.879,22.54 L22.535,16.88 C22.926,16.49 22.926,15.86 22.535,15.46 C22.146,15.07 21.512,15.07 21.121,15.46 Z"/>
+                            </svg>
+                        </span>
+                        <span class="wallet-action-label">Вывести</span>
+                    </button>
+                    <button type="button" class="wallet-action-btn" id="wallet-action-history">
+                        <span class="wallet-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M16,30 C8.268,30 2,23.73 2,16 C2,8.27 8.268,2 16,2 C23.732,2 30,8.27 30,16 C30,23.73 23.732,30 16,30 Z M16,0 C7.163,0 0,7.16 0,16 C0,24.84 7.163,32 16,32 C24.837,32 32,24.84 32,16 C32,7.16 24.837,0 16,0 Z"/>
+                                <path d="M11 10h9l-2.7-2.7a1 1 0 1 1 1.4-1.4l4.4 4.4a1 1 0 0 1 0 1.4l-4.4 4.4a1 1 0 1 1-1.4-1.4L20 12h-9a1 1 0 0 1 0-2z"/>
+                                <path d="M21 22h-9l2.7 2.7a1 1 0 1 1-1.4 1.4L8.9 21.7a1 1 0 0 1 0-1.4l4.4-4.4a1 1 0 1 1 1.4 1.4L12 20h9a1 1 0 0 1 0 2z"/>
+                            </svg>
+                        </span>
+                        <span class="wallet-action-label">Обмен</span>
+                    </button>
+                    <button type="button" class="wallet-action-btn wallet-action-btn-scan is-disabled" id="wallet-action-scan" aria-label="Сканер QR" title="Сканер QR" disabled aria-disabled="true">
+                        <span class="wallet-action-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M23 4C23 2.34315 21.6569 1 20 1H16C15.4477 1 15 1.44772 15 2C15 2.55228 15.4477 3 16 3H20C20.5523 3 21 3.44772 21 4V8C21 8.55228 21.4477 9 22 9C22.5523 9 23 8.55228 23 8V4Z"/>
+                                <path d="M23 16C23 15.4477 22.5523 15 22 15C21.4477 15 21 15.4477 21 16V20C21 20.5523 20.5523 21 20 21H16C15.4477 21 15 21.4477 15 22C15 22.5523 15.4477 23 16 23H20C21.6569 23 23 21.6569 23 20V16Z"/>
+                                <path d="M4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 2.55228 15 2 15C1.44772 15 1 15.4477 1 16V20C1 21.6569 2.34315 23 4 23H8C8.55228 23 9 22.5523 9 22C9 21.4477 8.55228 21 8 21H4Z"/>
+                                <path d="M1 8C1 8.55228 1.44772 9 2 9C2.55228 9 3 8.55228 3 8V4C3 3.44772 3.44772 3 4 3H8C8.55228 3 9 2.55228 9 2C9 1.44772 8.55228 1 8 1H4C2.34315 1 1 2.34315 1 4V8Z"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11 6C11 5.44772 10.5523 5 10 5H6C5.44772 5 5 5.44772 5 6V10C5 10.5523 5.44772 11 6 11H10C10.5523 11 11 10.5523 11 10V6ZM9 7.5C9 7.22386 8.77614 7 8.5 7H7.5C7.22386 7 7 7.22386 7 7.5V8.5C7 8.77614 7.22386 9 7.5 9H8.5C8.77614 9 9 8.77614 9 8.5V7.5Z"/>
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M18 13C18.5523 13 19 13.4477 19 14V18C19 18.5523 18.5523 19 18 19H14C13.4477 19 13 18.5523 13 18V14C13 13.4477 13.4477 13 14 13H18ZM15 15.5C15 15.2239 15.2239 15 15.5 15H16.5C16.7761 15 17 15.2239 17 15.5V16.5C17 16.7761 16.7761 17 16.5 17H15.5C15.2239 17 15 16.7761 15 16.5V15.5Z"/>
+                                <path d="M14 5C13.4477 5 13 5.44772 13 6C13 6.55229 13.4477 7 14 7H16.5C16.7761 7 17 7.22386 17 7.5V10C17 10.5523 17.4477 11 18 11C18.5523 11 19 10.5523 19 10V6C19 5.44772 18.5523 5 18 5H14Z"/>
+                                <path d="M14 8C13.4477 8 13 8.44771 13 9V10C13 10.5523 13.4477 11 14 11C14.5523 11 15 10.5523 15 10V9C15 8.44772 14.5523 8 14 8Z"/>
+                                <path d="M6 13C5.44772 13 5 13.4477 5 14V16C5 16.5523 5.44772 17 6 17C6.55229 17 7 16.5523 7 16V15.5C7 15.2239 7.22386 15 7.5 15H10C10.5523 15 11 14.5523 11 14C11 13.4477 10.5523 13 10 13H6Z"/>
+                                <path d="M10 17C9.44771 17 9 17.4477 9 18C9 18.5523 9.44771 19 10 19C10.5523 19 11 18.5523 11 18C11 17.4477 10.5523 17 10 17Z"/>
+                            </svg>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="settings-section wallet-stats-card">
+                <div class="section-title">Статистика</div>
+                <div class="wallet-stats-grid">
+                    <div class="wallet-stat-item">
+                        <span class="wallet-stat-label">Доход</span>
+                        <span class="wallet-stat-value positive" id="wallet-stat-income">0 ₽</span>
+                    </div>
+                    <div class="wallet-stat-item">
+                        <span class="wallet-stat-label">Расход</span>
+                        <span class="wallet-stat-value negative" id="wallet-stat-expense">0 ₽</span>
+                    </div>
+                    <div class="wallet-stat-item">
+                        <span class="wallet-stat-label">Кэшбек</span>
+                        <span class="wallet-stat-value" id="wallet-stat-cashback">0 ₽</span>
+                    </div>
+                    <div class="wallet-stat-item">
+                        <span class="wallet-stat-label">Лимит</span>
+                        <span class="wallet-stat-value" id="wallet-stat-limit">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section wallet-history-card">
+                <div class="section-title">Последние операции</div>
+                <div class="wallet-history-list" id="wallet-history-list">
+                    <div class="wallet-history-empty">Операций пока нет</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-wallet-send" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section wallet-workspace-card">
+                <div class="wallet-screen-header">
+                    <button type="button" class="back-btn-glass" data-back-wallet aria-label="Назад">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="wallet-screen-title">Отправить</div>
+                </div>
+                <div class="wallet-operation-panel" id="wallet-panel-send">
+                    <div class="wallet-send-bank-head">
+                        <span>Перевод</span>
+                        <strong id="wallet-send-balance-hint" hidden>Баланс: 0 ₽</strong>
+                    </div>
+                    <div class="wallet-method-grid wallet-send-methods" id="wallet-send-methods">
+                        <button type="button" class="wallet-method-btn is-disabled" data-method="qr" disabled aria-disabled="true" title="Сканирование QR временно недоступно">
+                            <span class="wallet-method-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M23 4C23 2.34315 21.6569 1 20 1H16C15.4477 1 15 1.44772 15 2C15 2.55228 15.4477 3 16 3H20C20.5523 3 21 3.44772 21 4V8C21 8.55228 21.4477 9 22 9C22.5523 9 23 8.55228 23 8V4Z"/>
+                                    <path d="M23 16C23 15.4477 22.5523 15 22 15C21.4477 15 21 15.4477 21 16V20C21 20.5523 20.5523 21 20 21H16C15.4477 21 15 21.4477 15 22C15 22.5523 15.4477 23 16 23H20C21.6569 23 23 21.6569 23 20V16Z"/>
+                                    <path d="M4 21C3.44772 21 3 20.5523 3 20V16C3 15.4477 2.55228 15 2 15C1.44772 15 1 15.4477 1 16V20C1 21.6569 2.34315 23 4 23H8C8.55228 23 9 22.5523 9 22C9 21.4477 8.55228 21 8 21H4Z"/>
+                                    <path d="M1 8C1 8.55228 1.44772 9 2 9C2.55228 9 3 8.55228 3 8V4C3 3.44772 3.44772 3 4 3H8C8.55228 3 9 2.55228 9 2C9 1.44772 8.55228 1 8 1H4C2.34315 1 1 2.34315 1 4V8Z"/>
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11 6C11 5.44772 10.5523 5 10 5H6C5.44772 5 5 5.44772 5 6V10C5 10.5523 5.44772 11 6 11H10C10.5523 11 11 10.5523 11 10V6ZM9 7.5C9 7.22386 8.77614 7 8.5 7H7.5C7.22386 7 7 7.22386 7 7.5V8.5C7 8.77614 7.22386 9 7.5 9H8.5C8.77614 9 9 8.77614 9 8.5V7.5Z"/>
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M18 13C18.5523 13 19 13.4477 19 14V18C19 18.5523 18.5523 19 18 19H14C13.4477 19 13 18.5523 13 18V14C13 13.4477 13.4477 13 14 13H18ZM15 15.5C15 15.2239 15.2239 15 15.5 15H16.5C16.7761 15 17 15.2239 17 15.5V16.5C17 16.7761 16.7761 17 16.5 17H15.5C15.2239 17 15 16.7761 15 16.5V15.5Z"/>
+                                    <path d="M14 5C13.4477 5 13 5.44772 13 6C13 6.55229 13.4477 7 14 7H16.5C16.7761 7 17 7.22386 17 7.5V10C17 10.5523 17.4477 11 18 11C18.5523 11 19 10.5523 19 10V6C19 5.44772 18.5523 5 18 5H14Z"/>
+                                    <path d="M14 8C13.4477 8 13 8.44771 13 9V10C13 10.5523 13.4477 11 14 11C14.5523 11 15 10.5523 15 10V9C15 8.44772 14.5523 8 14 8Z"/>
+                                    <path d="M6 13C5.44772 13 5 13.4477 5 14V16C5 16.5523 5.44772 17 6 17C6.55229 17 7 16.5523 7 16V15.5C7 15.2239 7.22386 15 7.5 15H10C10.5523 15 11 14.5523 11 14C11 13.4477 10.5523 13 10 13H6Z"/>
+                                    <path d="M10 17C9.44771 17 9 17.4477 9 18C9 18.5523 9.44771 19 10 19C10.5523 19 11 18.5523 11 18C11 17.4477 10.5523 17 10 17Z"/>
+                                </svg>
+                            </span>
+                            <span>Сканировать QR</span>
+                        </button>
+                        <button type="button" class="wallet-method-btn" data-method="contacts">
+                            <span class="wallet-method-icon" aria-hidden="true">
+                                <svg viewBox="0 0 22 32" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11 20C15.971 20 20 15.522 20 10C20 4.478 15.971 0 11 0C6.029 0 2 4.478 2 10C2 15.522 6.029 20 11 20ZM19.703 17.319C17.691 20.161 14.546 22 11 22C7.454 22 4.309 20.161 2.297 17.319C0.904 18.411 0 20.091 0 22V26C0 29.313 2.687 32 6 32H16C19.313 32 22 29.313 22 26V22C22 20.091 21.096 18.411 19.703 17.319Z"/>
+                                </svg>
+                            </span>
+                            <span>Контакты</span>
+                        </button>
+                        <button type="button" class="wallet-method-btn" data-method="wallet">
+                            <span class="wallet-method-icon" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H7a4 4 0 0 1-4-4V5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M18 12h.01" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <span>Номер кошелька</span>
+                        </button>
+                    </div>
+
+                    <div class="wallet-send-method-card" id="wallet-send-method-card" hidden>
+                        <div class="wallet-send-method-title" id="wallet-send-method-title">Выберите способ перевода</div>
+                    <form id="wallet-send-form" class="wallet-operation-form">
+                        <input type="hidden" id="wallet-send-contact" value="">
+                        <div class="wallet-contact-row" id="wallet-contact-row" hidden>
+                            <button type="button" id="wallet-send-contact-btn" class="wallet-contact-select-btn">Выберите контакт</button>
+                        </div>
+                        <input type="text" id="wallet-send-wallet" class="wallet-op-input" placeholder="Номер счета (например, 834-399-349)" hidden>
+                        <div id="wallet-send-recipient-preview" class="wallet-send-recipient-preview" hidden></div>
+                        <div class="wallet-send-qr-wrap" id="wallet-send-qr-wrap" hidden>
+                            <button type="button" id="wallet-send-qr-action" class="wallet-op-submit-btn">Сканировать QR код</button>
+                        </div>
+                        <div class="wallet-send-amount-wrap" id="wallet-send-amount-wrap" hidden>
+                            <input type="number" min="1" step="1" id="wallet-send-amount" class="wallet-op-input wallet-op-input-amount" placeholder="0" required>
+                            <button type="button" class="wallet-send-currency-toggle" id="wallet-send-currency-toggle" aria-label="Сменить валюту перевода">₽</button>
+                        </div>
+                        <button type="submit" id="wallet-send-submit-btn" class="wallet-op-submit-btn" hidden>Отправить деньги</button>
+                    </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-wallet-settings" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section">
+                <div class="wallet-screen-header wallet-settings-header">
+                    <button type="button" class="back-btn-glass" data-back-wallet aria-label="Назад">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="section-title">Настройки кошелька</div>
+                </div>
+                <div class="devices-list">
+                    <label class="wallet-settings-item notification-toggle-row" for="wallet-hide-balance-on-open">
+                        <div class="notification-toggle-text">
+                            <span>Скрывать баланс при входе</span>
+                            <span class="action-button-desc">Маскировать сумму при каждом входе в кошелек</span>
+                        </div>
+                        <input type="checkbox" id="wallet-hide-balance-on-open" class="notification-toggle-input">
+                        <span class="notification-toggle-switch"></span>
+                    </label>
+                    <div class="wallet-settings-item wallet-settings-account">
+                        <div>
+                            <span>Номер счета</span>
+                            <div class="action-button-desc">Индивидуальный номер для переводов</div>
+                        </div>
+                        <strong id="wallet-account-number">000-000-000</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-wallet-history" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section wallet-workspace-card">
+                <div class="wallet-screen-header">
+                    <button type="button" class="back-btn-glass" data-back-wallet aria-label="Назад">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="wallet-screen-title">Обмен валюты</div>
+                </div>
+                <div class="wallet-operation-panel" id="wallet-panel-history">
+                    <div class="wallet-exchange-card">
+                        <div class="wallet-exchange-head">
+                            <div class="wallet-exchange-title">Конвертация между счетами</div>
+                            <div class="wallet-exchange-fee">Комиссия: 5%</div>
+                        </div>
+                        <form id="wallet-exchange-form" class="wallet-operation-form">
+                            <div class="wallet-exchange-pair" id="wallet-exchange-pair">RUB → USD</div>
+                            <button type="button" id="wallet-exchange-toggle" class="wallet-op-submit-btn">Поменять направление</button>
+                            <input type="number" min="1" step="0.01" id="wallet-exchange-amount" class="wallet-op-input" placeholder="Сумма для обмена" required>
+                            <div class="wallet-exchange-preview" id="wallet-exchange-preview">К зачислению: 0 $</div>
+                            <button type="submit" class="wallet-op-submit-btn">Обменять</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-wallet-contact-picker" class="screen">
+        <div class="settings-content notifications-content">
+            <div class="settings-section wallet-workspace-card">
+                <div class="wallet-screen-header">
+                    <button type="button" class="back-btn-glass" id="wallet-contact-picker-back" aria-label="Назад">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </button>
+                    <div class="wallet-screen-title">Выберите контакт</div>
+                </div>
+                <div class="wallet-operation-panel">
+                    <div class="wallet-contact-picker-list" id="wallet-contact-picker-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Экран настроек -->
+    <div id="screen-settings" class="screen">
+        <div class="settings-content">
+            <div class="settings-section">
+                <div class="section-title">Аккаунты</div>
+                <div id="accounts-list" class="accounts-list"></div>
+            </div>
+            <div class="settings-section">
+                <div class="action-buttons-grid">
+                    <div class="action-button" id="action-notifications">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.27 5.27a2 2 0 0 1 3.46 0"/>
+                            <path d="M12 22a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3z"/>
+                            <path d="M4.29 16.29A1 1 0 0 0 5 18h14a1 1 0 0 0 .71-1.71C18.06 14.63 17 12.74 17 9a5 5 0 1 0-10 0c0 3.74-1.06 5.63-2.71 7.29z"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Уведомления</span>
+                            <span class="action-button-desc">Настройка звуков и оповещений</span>
+                        </div>
+                    </div>
+                    <div class="action-button" id="action-devices">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Устройства</span>
+                            <span class="action-button-desc">Управление привязанными устройствами</span>
+                        </div>
+                    </div>
+                    <div class="action-button" id="action-theme-settings">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="4"></circle>
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Тема</span>
+                            <span class="action-button-desc">Переключение тёмной и светлой темы</span>
+                        </div>
+                    </div>
+                    <div class="action-button" id="action-language">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="m5 8 6 6"/>
+                            <path d="m4 14 6-6 2-3"/>
+                            <path d="M2 5h12"/>
+                            <path d="M7 2h1"/>
+                            <path d="m22 22-5-10-5 10"/>
+                            <path d="M14 18h6"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Язык</span>
+                            <span class="action-button-desc">Выбор языка интерфейса</span>
+                        </div>
+                    </div>
+                    <div class="action-button" id="action-wallet">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v9a2 2 0 0 1-2 2H7a4 4 0 0 1-4-4V5"/>
+                            <path d="M18 12h.01"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Кошелек</span>
+                            <span class="action-button-desc">Баланс и история транзакций</span>
+                        </div>
+                    </div>
+                    <div class="action-button" id="services-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18"/>
+                            <line x1="8" y1="2" x2="8" y2="22"/>
+                            <line x1="16" y1="2" x2="16" y2="22"/>
+                            <line x1="2" y1="8" x2="22" y2="8"/>
+                            <line x1="2" y1="16" x2="22" y2="16"/>
+                        </svg>
+                        <div class="action-button-text">
+                            <span>Сервисы</span>
+                            <span class="action-button-desc">Дополнительные возможности</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-section">
+                <div class="premium-cards">
+                    <div class="premium-card" id="premium-card">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                        <span class="premium-title">Margelet Premium</span>
+                    </div>
+                    <div class="premium-card" id="business-card">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                        </svg>
+                        <span class="premium-title">Margelet Business</span>
+                    </div>
+                </div>
+            </div>
+            <div class="version-text">Margelet Web v0.4.6</div>
+        </div>
+    </div>
+
+    <!-- Экран чужого профиля -->
+    <div id="screen-user-profile" class="screen">
+        <div class="user-profile-header">
+            <button id="back-from-user-profile" class="back-btn-glass" type="button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <div class="user-profile-menu-container">
+                <button id="user-profile-menu-btn" class="user-profile-menu-btn" type="button" aria-label="Действия профиля">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                </button>
+                <div class="profile-dropdown-menu" id="user-profile-dropdown-menu">
+                    <div class="profile-dropdown-item" id="user-profile-open-chat-action">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+                        </svg>
+                        <span>Открыть чат</span>
+                    </div>
+                    <div class="profile-dropdown-item" id="user-profile-add-contact-action">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                            <line x1="20" y1="8" x2="20" y2="14"/>
+                            <line x1="17" y1="11" x2="23" y2="11"/>
+                        </svg>
+                        <span>Добавить в контакты</span>
+                    </div>
+                    <div class="profile-dropdown-item logout-item" id="user-profile-block-action">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                        <span>Заблокировать пользователя</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-content-glass user-profile-content-glass">
+            <div class="avatar-section-glass">
+                <div class="avatar-wrapper-glass">
+                    <div class="avatar-glow" id="user-profile-avatar-glow"></div>
+                    <div id="user-profile-avatar-display" class="profile-avatar-glass"></div>
+                </div>
+                <div id="user-profile-name" class="profile-username-display">Пользователь</div>
+            </div>
+
+            <div class="account-details-section user-profile-details-section">
+                <div class="detail-item-static">
+                    <span class="detail-item-static-label">Описание</span>
+                    <span id="user-profile-status" class="detail-item-static-value">Не указан</span>
+                </div>
+
+                <div class="detail-item-static">
+                    <span class="detail-item-static-label">Username</span>
+                    <span id="user-profile-username" class="detail-item-static-value">Не указан</span>
+                </div>
+
+                <div class="detail-item-static">
+                    <span class="detail-item-static-label">Дата рождения</span>
+                    <span id="user-profile-birthday" class="detail-item-static-value">Не указана</span>
+                </div>
+
+                <div class="profile-media-switcher">
+                    <div class="chat-submenu-inner profile-media-tabs-inner" id="user-profile-media-tabs">
+                        <button class="submenu-btn" data-tab="stories" type="button">Истории</button>
+                        <button class="submenu-btn" data-tab="collection" type="button">Коллекция</button>
+                    </div>
+                </div>
+
+                <div class="profile-media-panels" id="user-profile-media-panels">
+                    <div class="profile-media-panel" data-panel="stories">
+                        <div class="profile-stories-section user-profile-stories-section">
+                            <div class="stories-title">Истории</div>
+                            <div class="stories-list" id="user-profile-stories-list">
+                                <div class="stories-empty">Нет историй</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-media-panel" data-panel="collection">
+                        <div class="profile-collection-section user-profile-collection-section">
+                            <div class="collection-title">Коллекция</div>
+                            <div class="collection-list" id="user-profile-collection-list">
+                                <div class="collection-empty">Коллекция пуста</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Основной экран мессенджера -->
+    <div id="screen-main" class="screen">
+        <div class="messenger-header">
+            <span class="header-title">Чаты</span>
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="chat-search" placeholder="Поиск...">
+                <button class="search-toggle" id="search-toggle">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                </button>
+            </div>
+            
+
+            <div class="profile-container">
+                <div id="avatar-btn" class="avatar"></div>
+            </div>
+        </div>
+        <!-- Submenu: Чаты / Сообщества / Контакты -->
+        <div class="chat-submenu">
+            <div class="chat-submenu-inner">
+                <button class="submenu-btn" data-tab="chats">Чаты</button>
+                <button class="submenu-btn" data-tab="communities">Сообщества</button>
+                <button class="submenu-btn" data-tab="contacts">Контакты</button>
+            </div>
+        </div>
+        <div class="messenger-container">
+            <div class="chat-area" id="chat-area"></div>
+            <form id="chat-form" class="chat-input-area">
+                <input type="text" id="chat-message-input" placeholder="Сообщение..." required autocomplete="off">
+                <button type="submit" aria-label="Отправить сообщение">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 12L20 4L14 20L11 13L4 12Z"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Карточка авторизации -->
+    <div class="glass-card" id="auth-card">
+        <img src="https://i.imgur.com/Sx7pmLM.png" alt="Логотип" class="logo">
+        <div id="screen-register" class="screen">
+            <h2>Создать аккаунт</h2>
+            <p class="subtitle">Присоединяйся в Marglet</p>
+            <form id="register-form">
+                <div class="input-group">
+                    <input type="email" placeholder="Электронная почта" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" placeholder="Придумайте пароль" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+            </form>
+            <div class="bottom-link">
+                Уже есть аккаунт? <span class="nav-link" data-screen="screen-login">Войти</span>
+            </div>
+        </div>
+        <div id="screen-login" class="screen active">
+            <h2>С возвращением!</h2>
+            <p class="subtitle">Рады видеть вас снова</p>
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder="Электронная почта" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" placeholder="Пароль" required>
+                </div>
+                <span class="forgot-password" onclick="startPasswordReset()">Забыли пароль?</span>
+                <button type="submit" class="btn btn-primary">Войти</button>
+            </form>
+            <div class="bottom-link">
+                Нет аккаунта? <span class="nav-link" data-screen="screen-register">Создать</span>
+            </div>
+        </div>
+        <div id="screen-name" class="screen">
+            <h2>Как вас зовут?</h2>
+            <p class="subtitle">Введите имя, которое будут видеть другие пользователи</p>
+            <form id="name-form">
+                <div class="name-input-container">
+                    <input type="text" id="register-name" placeholder="Имя пользователя" maxlength="30" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Продолжить</button>
+            </form>
+            <div class="bottom-link">
+                <span class="nav-link" data-screen="screen-register">Назад</span>
+            </div>
+        </div>
+
+        <div id="screen-phone" class="screen">
+            <h2>Безопасность</h2>
+            <p class="subtitle">Привяжите номер телефона для защиты аккаунта</p>
+            <form id="phone-form">
+                <div class="phone-input-container">
+                    <div class="country-picker" id="country-picker-trigger">
+                        <span id="current-flag">RU</span>
+                        <span id="current-code">+7</span>
+                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1L5 5L9 1" stroke="white" stroke-alpha="0.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <input type="tel" id="phone-field" placeholder="000 000 00 00" required>
+                    <div class="country-dropdown" id="country-dropdown">
+                        <div class="search-box">
+                            <input type="text" id="country-search" placeholder="Поиск страны...">
+                        </div>
+                        <ul class="country-list" id="country-list"></ul>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Привязать номер</button>
+                <button type="button" class="btn btn-secondary" onclick="goToMainScreen()">Пропустить</button>
+            </form>
+        </div>
+        <div id="screen-reset-email" class="screen">
+            <h2>Сброс пароля</h2>
+            <p class="subtitle">Введите почту от аккаунта</p>
+            <form id="reset-email-form">
+                <div class="input-group">
+                    <input type="email" id="reset-email-input" placeholder="Электронная почта" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Отправить код</button>
+            </form>
+            <div class="bottom-link">
+                <span class="nav-link" data-screen="screen-login">Вернуться назад</span>
+            </div>
+        </div>
+        <div id="screen-reset-code" class="screen">
+            <h2>Восстановление</h2>
+            <p class="subtitle">Введите код из письма</p>
+            <div class="code-container">
+                <input type="text" class="reset-code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="text" class="reset-code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="text" class="reset-code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+                <input type="text" class="reset-code-input" maxlength="1" pattern="[0-9]*" inputmode="numeric" required>
+            </div>
+            <div class="bottom-link">
+                <span class="nav-link" data-screen="screen-reset-email">Назад</span>
+            </div>
+        </div>
+        <div id="screen-new-password" class="screen">
+            <h2>Новый пароль</h2>
+            <p class="subtitle">Придумайте новый надежный пароль</p>
+            <form id="new-password-form">
+                <div class="input-group">
+                    <input type="password" id="new-password-input" placeholder="Новый пароль" minlength="6" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Сохранить и войти</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js" defer></script>
+
+    <div class="bottom-nav-glass">
+        <div class="nav-item active" data-screen="screen-main">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>
+            </svg>
+            <span>Чаты</span>
+        </div>
+        <div class="nav-item" data-screen="screen-profile">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="8" r="5"/>
+                <path d="M20 21a8 8 0 0 0-16 0"/>
+            </svg>
+            <span>Профиль</span>
+        </div>
+        <div class="nav-item" data-screen="screen-settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 3H13C13.5523 3 14 3.44772 14 4V4.56879C14 4.99659 14.2871 5.36825 14.6822 5.53228C15.0775 5.69638 15.5377 5.63384 15.8403 5.33123L16.2426 4.92891C16.6331 4.53838 17.2663 4.53838 17.6568 4.92891L19.071 6.34312C19.4616 6.73365 19.4615 7.36681 19.071 7.75734L18.6688 8.1596C18.3661 8.46223 18.3036 8.92247 18.4677 9.31774C18.6317 9.71287 19.0034 10 19.4313 10L20 10C20.5523 10 21 10.4477 21 11V13C21 13.5523 20.5523 14 20 14H19.4312C19.0034 14 18.6318 14.2871 18.4677 14.6822C18.3036 15.0775 18.3661 15.5377 18.6688 15.8403L19.071 16.2426C19.4616 16.6331 19.4616 17.2663 19.071 17.6568L17.6568 19.071C17.2663 19.4616 16.6331 19.4616 16.2426 19.071L15.8403 18.6688C15.5377 18.3661 15.0775 18.3036 14.6822 18.4677C14.2871 18.6318 14 19.0034 14 19.4312V20C14 20.5523 13.5523 21 13 21H11C10.4477 21 10 20.5523 10 20V19.4313C10 19.0034 9.71287 18.6317 9.31774 18.4677C8.92247 18.3036 8.46223 18.3661 8.1596 18.6688L7.75732 19.071C7.36679 19.4616 6.73363 19.4616 6.34311 19.071L4.92889 17.6568C4.53837 17.2663 4.53837 16.6331 4.92889 16.2426L5.33123 15.8403C5.63384 15.5377 5.69638 15.0775 5.53228 14.6822C5.36825 14.2871 4.99659 14 4.56879 14H4C3.44772 14 3 13.5523 3 13V11C3 10.4477 3.44772 10 4 10L4.56877 10C4.99658 10 5.36825 9.71288 5.53229 9.31776C5.6964 8.9225 5.63386 8.46229 5.33123 8.15966L4.92891 7.75734C4.53838 7.36681 4.53838 6.73365 4.92891 6.34313L6.34312 4.92891C6.73365 4.53839 7.36681 4.53839 7.75734 4.92891L8.15966 5.33123C8.46228 5.63386 8.9225 5.6964 9.31776 5.53229C9.71288 5.36825 10 4.99658 10 4.56876V4C10 3.44772 10.4477 3 11 3Z" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M14 12C14 13.1046 13.1046 14 12 14C10.8954 14 10 13.1046 10 12C10 10.8954 10.8954 10 12 10C13.1046 10 14 10.8954 14 12Z" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span>Настройки</span>
+        </div>
+        <div class="nav-item nav-item-story" id="nav-add-story-btn" role="button" aria-label="Добавить историю" title="Добавить историю">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="8"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            <span>История</span>
+        </div>
+    </div>
+
+</body>
+</html>
