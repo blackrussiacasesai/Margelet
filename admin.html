@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marglet Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--bg:#08131a;--panel:rgba(10,27,37,.84);--text:#edf8ff;--muted:#9ac4da;--line:rgba(162,222,255,.2);--mint:#4ed7c9;--amber:#ffc96e;--danger:#ff7c7c}
+    *{box-sizing:border-box}
+    body{margin:0;color:var(--text);font-family:"Manrope",sans-serif;background:radial-gradient(1000px 500px at 10% -10%,rgba(255,201,110,.2),transparent 60%),radial-gradient(1100px 600px at 85% 10%,rgba(78,215,201,.18),transparent 60%),linear-gradient(150deg,#071017 0%,#091a23 45%,#061219 100%)}
+    .shell{width:min(1250px,96vw);margin:20px auto;display:grid;gap:14px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(12px)}
+    .hero{padding:18px;display:grid;gap:14px;grid-template-columns:1.4fr 1fr}
+    .kicker{margin:0;color:var(--amber);font:700 12px/1 "Space Grotesk",sans-serif;letter-spacing:.08em;text-transform:uppercase}
+    h1,h2,h3{margin:0;font-family:"Space Grotesk",sans-serif}
+    .muted{color:var(--muted)}
+    .conn{display:grid;gap:8px}
+    .row{display:grid;gap:8px}
+    .row.cols-2{grid-template-columns:1fr 1fr}
+    .row.cols-3{grid-template-columns:1fr 1fr 1fr}
+    label{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{width:100%;padding:10px 11px;border-radius:12px;border:1px solid var(--line);background:rgba(6,14,20,.74);color:var(--text);outline:none}
+    textarea{min-height:80px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(78,215,201,.9);box-shadow:0 0 0 3px rgba(78,215,201,.16)}
+    button{cursor:pointer;border-radius:12px;padding:10px 14px;border:1px solid transparent;font-weight:700}
+    .btn-primary{background:linear-gradient(95deg,var(--mint),#9bf6ec);color:#032028}
+    .btn-amber{background:linear-gradient(95deg,var(--amber),#ffe6ac);color:#211d0b}
+    .btn-ghost{background:rgba(255,255,255,.03);color:var(--text);border-color:var(--line)}
+    .btn-danger{background:rgba(255,124,124,.13);color:#ffd5d5;border-color:rgba(255,124,124,.4)}
+    .tabs{display:flex;gap:8px;padding:10px}
+    .tab-btn{background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--text)}
+    .tab-btn.active{background:rgba(78,215,201,.2);border-color:rgba(78,215,201,.5)}
+    .pane{display:none}
+    .pane.active{display:block}
+    .content{padding:12px;display:grid;gap:14px}
+    .layout-2{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+    .metrics{display:grid;gap:8px}
+    .metric{border:1px dashed var(--line);border-radius:10px;padding:10px}
+    .table-card{padding:0;overflow:hidden}
+    .table-top{padding:12px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .status{padding:10px 12px 0;font-size:14px;color:var(--muted)}
+    .table-wrap{padding:12px;max-height:48vh;overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{text-align:left;padding:9px 7px;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px}
+    th{color:var(--muted);font-weight:600}
+    .actions{display:flex;gap:6px}
+    .tiny{padding:6px 8px;border-radius:8px;font-size:12px}
+    .empty{text-align:center;padding:22px 10px;color:var(--muted)}
+    dialog{border:1px solid var(--line);border-radius:14px;background:rgba(7,18,25,.96);color:var(--text);width:min(520px,95vw)}
+    dialog::backdrop{background:rgba(1,6,10,.68)}
+    .dialog-form{display:grid;gap:10px;padding:14px}
+    .dialog-actions{display:flex;justify-content:flex-end;gap:8px}
+    @media (max-width:980px){.hero,.layout-2,.row.cols-2,.row.cols-3{grid-template-columns:1fr}.table-top{flex-direction:column;align-items:stretch}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="card hero">
+      <div>
+        <p class="kicker">Marglet Unified Admin</p>
+        <h1>Управление коллекцией и профилями</h1>
+        <p class="muted">Один файл: встроенные стили и логика. Работает через Supabase для таблиц public.collection_items и public.profiles.</p>
+      </div>
+      <div class="conn">
+        <div class="row cols-2">
+          <label>Supabase URL<input id="sb-url" placeholder="https://project.supabase.co"></label>
+          <label>Anon Key<input id="sb-key" placeholder="sb_publishable_..."></label>
+        </div>
+        <div class="row cols-2">
+          <button class="btn-primary" id="connect-btn" type="button">Подключиться</button>
+          <button class="btn-ghost" id="save-conn-btn" type="button">Сохранить подключение</button>
+        </div>
+        <div id="connect-status" class="muted">Заполните URL и Key или нажмите "Подключиться" для автоподхвата из window.SUPABASE_URL.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="tabs">
+        <button class="tab-btn active" type="button" data-pane="collection-pane">Коллекция</button>
+        <button class="tab-btn" type="button" data-pane="profiles-pane">Профили</button>
+      </div>
+
+      <div class="content pane active" id="collection-pane">
+        <div class="layout-2">
+          <section class="card" style="padding:12px;">
+            <h2>Выдача кубов</h2>
+            <div class="row" style="margin-top:10px;">
+              <label>Email аккаунта<input id="target-email" type="email" placeholder="user@example.com"></label>
+              <div class="row cols-2">
+                <button class="btn-ghost" id="load-collection-btn" type="button">Загрузить коллекцию</button>
+                <button class="btn-ghost" id="refresh-collection-btn" type="button">Обновить</button>
+              </div>
+            </div>
+            <form id="grant-form" class="row" style="margin-top:8px;" novalidate>
+              <div class="row cols-3">
+                <label>Редкость
+                  <select id="item-rarity"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпический</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option></select>
+                </label>
+                <label>Стоимость RUB<input id="item-value" type="number" min="1" value="3449"></label>
+                <label>Серия<input id="item-series" placeholder="MX-2026-42"></label>
+              </div>
+              <div class="row cols-2">
+                <label>Serial<input id="item-serial" placeholder="2481"></label>
+                <button class="btn-primary" type="submit">Выдать 1 куб</button>
+              </div>
+            </form>
+            <form id="bulk-form" class="row" style="margin-top:10px;" novalidate>
+              <div class="row cols-3">
+                <label>Количество<input id="bulk-count" type="number" min="1" max="100" value="5"></label>
+                <label>Редкость
+                  <select id="bulk-rarity"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпический</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option></select>
+                </label>
+                <button class="btn-amber" type="submit">Массовая выдача</button>
+              </div>
+            </form>
+          </section>
+          <section class="card" style="padding:12px;">
+            <h2>Метрики коллекции</h2>
+            <div class="metrics" style="margin-top:10px;">
+              <div class="metric"><div class="muted">Предметов</div><strong id="metric-total">0</strong></div>
+              <div class="metric"><div class="muted">Общая стоимость</div><strong id="metric-value">0 RUB</strong></div>
+              <label>Поиск по таблице<input id="collection-search" placeholder="id, rarity, series, serial"></label>
+            </div>
+            <div id="collection-status" class="status">Введите email и нажмите "Загрузить коллекцию".</div>
+          </section>
+        </div>
+
+        <section class="card table-card">
+          <div class="table-top"><h2>Список предметов</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Редкость</th><th>Стоимость</th><th>Серия</th><th>Serial</th><th>Дата</th><th>Действия</th></tr></thead>
+              <tbody id="collection-tbody"><tr><td class="empty" colspan="7">Нет данных</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="content pane" id="profiles-pane">
+        <div class="layout-2">
+          <section class="card" style="padding:12px;">
+            <h2>Профили: загрузка и создание</h2>
+            <div class="row" style="margin-top:10px;">
+              <div class="row cols-2">
+                <label>Email профиля<input id="profile-email" type="email" placeholder="user@example.com"></label>
+                <label>Имя<input id="profile-name" placeholder="Имя"></label>
+              </div>
+              <div class="row cols-2">
+                <label>Username<input id="profile-username" placeholder="username"></label>
+                <label>Телефон<input id="profile-phone" placeholder="+79990000000"></label>
+              </div>
+              <div class="row cols-3">
+                <label>Birthday<input id="profile-birthday" type="date"></label>
+                <label>Свечение
+                  <select id="profile-glow"><option value="gradient">gradient</option><option value="pink">pink</option><option value="purple">purple</option><option value="blue">blue</option><option value="green">green</option><option value="orange">orange</option><option value="red">red</option><option value="cyan">cyan</option></select>
+                </label>
+                <label>Видимость email
+                  <select id="profile-visibility"><option value="contacts">contacts</option><option value="nobody">nobody</option></select>
+                </label>
+              </div>
+              <label>О себе<textarea id="profile-about" placeholder="Описание профиля"></textarea></label>
+              <div class="row cols-3">
+                <button class="btn-primary" id="upsert-profile-btn" type="button">Создать/обновить профиль</button>
+                <button class="btn-ghost" id="load-profile-btn" type="button">Загрузить профиль</button>
+                <button class="btn-danger" id="delete-profile-btn" type="button">Удалить профиль</button>
+              </div>
+            </div>
+          </section>
+          <section class="card" style="padding:12px;">
+            <h2>Список профилей</h2>
+            <div class="row" style="margin-top:10px;">
+              <div class="row cols-2">
+                <input id="profiles-search" placeholder="поиск: email, username, name">
+                <button class="btn-ghost" id="load-profiles-btn" type="button">Загрузить список</button>
+              </div>
+              <div class="metrics">
+                <div class="metric"><div class="muted">Профилей</div><strong id="profiles-count">0</strong></div>
+              </div>
+            </div>
+            <div id="profiles-status" class="status">Нажмите "Загрузить список" для загрузки профилей.</div>
+          </section>
+        </div>
+
+        <section class="card table-card">
+          <div class="table-top"><h2>Таблица профилей</h2></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Email</th><th>Имя</th><th>Username</th><th>Телефон</th><th>Видимость</th><th>Обновлено</th><th>Действия</th></tr></thead>
+              <tbody id="profiles-tbody"><tr><td class="empty" colspan="7">Нет данных</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="collection-edit-dialog">
+    <form id="collection-edit-form" class="dialog-form">
+      <h3>Редактировать предмет</h3>
+      <input id="edit-item-id" type="hidden">
+      <div class="row cols-2">
+        <label>Редкость<select id="edit-item-rarity"><option value="common">Обычный</option><option value="rare">Редкий</option><option value="epic">Эпический</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option></select></label>
+        <label>Стоимость RUB<input id="edit-item-value" type="number" min="1"></label>
+      </div>
+      <div class="row cols-2">
+        <label>Серия<input id="edit-item-series"></label>
+        <label>Serial<input id="edit-item-serial"></label>
+      </div>
+      <div class="dialog-actions"><button class="btn-ghost" type="button" id="close-collection-edit">Отмена</button><button class="btn-primary" type="submit">Сохранить</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    const rarityLabels={common:"Обычный",rare:"Редкий",epic:"Эпический",legendary:"Легендарный",mythic:"Мифический"};
+    let sb=null,collectionItems=[],profiles=[];
+    let loadedCollectionEmail="";
+
+    function normEmail(v=""){return String(v).trim().toLowerCase()}
+    function setText(id,text,color=""){const n=document.getElementById(id);if(!n)return;n.textContent=text;n.style.color=color||""}
+    function makeId(){return `collect_${Date.now()}_${Math.floor(Math.random()*9999)}`}
+    function rndSeries(){const y=new Date().getFullYear();return `MX-${y}-${Math.floor(Math.random()*90)+10}`}
+    function rndSerial(){return String(Math.floor(Math.random()*9000)+1000)}
+
+    function getConfiguredCredentials(){
+      const savedUrl=localStorage.getItem("admin_supabase_url")||"";
+      const savedKey=localStorage.getItem("admin_supabase_key")||"";
+      const runtimeUrl=window.SUPABASE_URL||"";
+      const runtimeKey=window.SUPABASE_ANON_KEY||"";
+      const url=savedUrl||runtimeUrl;
+      const key=savedKey||runtimeKey;
+      return {url,key};
+    }
+
+    function connectSupabase(){
+      const url=(document.getElementById("sb-url").value||"").trim();
+      const key=(document.getElementById("sb-key").value||"").trim();
+      if(!window.supabase||typeof window.supabase.createClient!=="function"){throw new Error("Supabase runtime не загружен")}
+      if(!url||!key){throw new Error("Заполните Supabase URL и Anon Key")}
+      sb=window.supabase.createClient(url,key);
+      setText("connect-status","Подключено к Supabase");
+      return sb;
+    }
+
+    function saveConnection(){
+      localStorage.setItem("admin_supabase_url",(document.getElementById("sb-url").value||"").trim());
+      localStorage.setItem("admin_supabase_key",(document.getElementById("sb-key").value||"").trim());
+      setText("connect-status","Параметры подключения сохранены локально");
+    }
+
+    function ensureSB(){if(sb)return sb;return connectSupabase()}
+
+    function renderCollection(items){
+      const q=(document.getElementById("collection-search").value||"").toLowerCase().trim();
+      const list=!q?items:items.filter(it=>[it.id,it.rarity,it.rarity_label,it.series,it.serial,it.value_rub].map(v=>String(v||"").toLowerCase()).join(" ").includes(q));
+      const tbody=document.getElementById("collection-tbody");
+      if(!list.length){tbody.innerHTML='<tr><td class="empty" colspan="7">Нет данных</td></tr>'}else{
+        tbody.innerHTML=list.map(it=>`<tr><td title="${it.id}">${it.id.slice(0,22)}...</td><td>${it.rarity_label||it.rarity||"-"}</td><td>${Number(it.value_rub||0).toLocaleString("ru-RU")}</td><td>${it.series||"-"}</td><td>${it.serial||"-"}</td><td>${new Date(it.created_at).toLocaleString("ru-RU")}</td><td><div class="actions"><button class="tiny btn-ghost" data-cmd="edit-item" data-id="${it.id}">Изменить</button><button class="tiny btn-danger" data-cmd="del-item" data-id="${it.id}">Удалить</button></div></td></tr>`).join("")
+      }
+      document.getElementById("metric-total").textContent=String(items.length);
+      const sum=items.reduce((a,b)=>a+Number(b.value_rub||0),0);
+      document.getElementById("metric-value").textContent=`${sum.toLocaleString("ru-RU")} RUB`;
+    }
+
+    async function loadCollection(){
+      const owner=normEmail(document.getElementById("target-email").value);
+      if(!owner){setText("collection-status","Введите email","#ffb6b6");return}
+      loadedCollectionEmail=owner;
+      setText("collection-status","Загрузка коллекции...");
+      try{
+        const client=ensureSB();
+        const {data,error}=await client.from("collection_items").select("id,owner_email,rarity,rarity_label,value_rub,series,serial,created_at").eq("owner_email",owner).order("created_at",{ascending:false}).limit(1000);
+        if(error) throw error;
+        collectionItems=Array.isArray(data)?data:[];
+        renderCollection(collectionItems);
+        setText("collection-status",`Загружено: ${collectionItems.length}`);
+      }catch(e){setText("collection-status",`Ошибка: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    function buildCollectionRow(owner,opt={}){
+      const rarity=String(opt.rarity||"common");
+      return {id:makeId(),owner_email:owner,type:"starry-cube",type_label:"Астральный куб",name:"Астральный куб",rarity,rarity_label:rarityLabels[rarity]||rarityLabels.common,value_rub:Number(opt.value||3449),series:String(opt.series||rndSeries()),serial:String(opt.serial||rndSerial()),created_at:new Date().toISOString()}
+    }
+
+    async function grantOne(e){
+      e.preventDefault();
+      const owner=normEmail(document.getElementById("target-email").value);
+      if(!owner){setText("collection-status","Укажите email","#ffb6b6");return}
+      try{
+        const row=buildCollectionRow(owner,{rarity:document.getElementById("item-rarity").value,value:document.getElementById("item-value").value,series:document.getElementById("item-series").value.trim(),serial:document.getElementById("item-serial").value.trim()});
+        const {error}=await ensureSB().from("collection_items").insert(row);
+        if(error) throw error;
+        setText("collection-status","Куб выдан");
+        await loadCollection();
+      }catch(e2){setText("collection-status",`Ошибка выдачи: ${e2.message||e2}`,"#ffb6b6")}
+    }
+
+    async function grantBulk(e){
+      e.preventDefault();
+      const owner=normEmail(document.getElementById("target-email").value);
+      const count=Number(document.getElementById("bulk-count").value||0);
+      if(!owner){setText("collection-status","Укажите email","#ffb6b6");return}
+      if(!Number.isInteger(count)||count<1||count>100){setText("collection-status","Количество от 1 до 100","#ffb6b6");return}
+      try{
+        const rarity=document.getElementById("bulk-rarity").value;
+        const rows=Array.from({length:count},()=>buildCollectionRow(owner,{rarity,value:3449}));
+        const {error}=await ensureSB().from("collection_items").insert(rows);
+        if(error) throw error;
+        setText("collection-status",`Выдано ${count} предметов`);
+        await loadCollection();
+      }catch(e3){setText("collection-status",`Ошибка массовой выдачи: ${e3.message||e3}`,"#ffb6b6")}
+    }
+
+    function openItemEdit(id){
+      const it=collectionItems.find(x=>x.id===id); if(!it) return;
+      document.getElementById("edit-item-id").value=it.id;
+      document.getElementById("edit-item-rarity").value=it.rarity||"common";
+      document.getElementById("edit-item-value").value=Number(it.value_rub||3449);
+      document.getElementById("edit-item-series").value=it.series||"";
+      document.getElementById("edit-item-serial").value=it.serial||"";
+      document.getElementById("collection-edit-dialog").showModal();
+    }
+
+    async function saveItemEdit(e){
+      e.preventDefault();
+      try{
+        const id=document.getElementById("edit-item-id").value;
+        const rarity=document.getElementById("edit-item-rarity").value;
+        const patch={rarity,rarity_label:rarityLabels[rarity]||rarityLabels.common,value_rub:Number(document.getElementById("edit-item-value").value||3449),series:document.getElementById("edit-item-series").value.trim(),serial:document.getElementById("edit-item-serial").value.trim()};
+        const {error}=await ensureSB().from("collection_items").update(patch).eq("id",id).eq("owner_email",loadedCollectionEmail);
+        if(error) throw error;
+        document.getElementById("collection-edit-dialog").close();
+        setText("collection-status","Предмет обновлен");
+        await loadCollection();
+      }catch(e4){setText("collection-status",`Ошибка обновления: ${e4.message||e4}`,"#ffb6b6")}
+    }
+
+    async function deleteItem(id){
+      if(!confirm("Удалить предмет?")) return;
+      try{
+        const {error}=await ensureSB().from("collection_items").delete().eq("id",id).eq("owner_email",loadedCollectionEmail);
+        if(error) throw error;
+        setText("collection-status","Предмет удален");
+        await loadCollection();
+      }catch(e5){setText("collection-status",`Ошибка удаления: ${e5.message||e5}`,"#ffb6b6")}
+    }
+
+    function fillProfileForm(p){
+      document.getElementById("profile-email").value=p.email||"";
+      document.getElementById("profile-name").value=p.display_name||"";
+      document.getElementById("profile-username").value=p.username||"";
+      document.getElementById("profile-phone").value=p.phone||"";
+      document.getElementById("profile-about").value=p.about||"";
+      document.getElementById("profile-birthday").value=p.birthday||"";
+      document.getElementById("profile-glow").value=p.glow_color||"gradient";
+      document.getElementById("profile-visibility").value=p.email_visibility||"contacts";
+    }
+
+    function readProfileForm(){
+      const email=normEmail(document.getElementById("profile-email").value);
+      return {email,display_name:document.getElementById("profile-name").value.trim(),username:document.getElementById("profile-username").value.trim()||null,phone:document.getElementById("profile-phone").value.trim(),about:document.getElementById("profile-about").value.trim(),birthday:document.getElementById("profile-birthday").value||null,glow_color:document.getElementById("profile-glow").value,email_visibility:document.getElementById("profile-visibility").value,last_seen_at:new Date().toISOString()}
+    }
+
+    async function upsertProfile(){
+      const profile=readProfileForm();
+      if(!profile.email){setText("profiles-status","Введите email","#ffb6b6");return}
+      try{
+        const {error}=await ensureSB().from("profiles").upsert(profile,{onConflict:"email"});
+        if(error) throw error;
+        setText("profiles-status","Профиль сохранен");
+        await loadProfiles();
+      }catch(e){setText("profiles-status",`Ошибка сохранения: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    async function loadOneProfile(){
+      const email=normEmail(document.getElementById("profile-email").value);
+      if(!email){setText("profiles-status","Введите email","#ffb6b6");return}
+      try{
+        const {data,error}=await ensureSB().from("profiles").select("email,display_name,username,phone,about,birthday,glow_color,email_visibility,updated_at").eq("email",email).maybeSingle();
+        if(error) throw error;
+        if(!data){setText("profiles-status","Профиль не найден");return}
+        fillProfileForm(data);
+        setText("profiles-status","Профиль загружен");
+      }catch(e){setText("profiles-status",`Ошибка загрузки профиля: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    async function deleteProfile(){
+      const email=normEmail(document.getElementById("profile-email").value);
+      if(!email){setText("profiles-status","Введите email","#ffb6b6");return}
+      if(!confirm("Удалить профиль?")) return;
+      try{
+        const {error}=await ensureSB().from("profiles").delete().eq("email",email);
+        if(error) throw error;
+        setText("profiles-status","Профиль удален");
+        await loadProfiles();
+      }catch(e){setText("profiles-status",`Ошибка удаления профиля: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    function renderProfiles(list){
+      const q=(document.getElementById("profiles-search").value||"").toLowerCase().trim();
+      const filtered=!q?list:list.filter(p=>[p.email,p.display_name,p.username,p.phone].map(v=>String(v||"").toLowerCase()).join(" ").includes(q));
+      const tbody=document.getElementById("profiles-tbody");
+      if(!filtered.length){tbody.innerHTML='<tr><td class="empty" colspan="7">Нет данных</td></tr>'}else{
+        tbody.innerHTML=filtered.map(p=>`<tr><td>${p.email||"-"}</td><td>${p.display_name||"-"}</td><td>${p.username||"-"}</td><td>${p.phone||"-"}</td><td>${p.email_visibility||"contacts"}</td><td>${p.updated_at?new Date(p.updated_at).toLocaleString("ru-RU"):"-"}</td><td><div class="actions"><button class="tiny btn-ghost" data-cmd="pick-profile" data-email="${p.email||""}">Открыть</button><button class="tiny btn-danger" data-cmd="del-profile" data-email="${p.email||""}">Удалить</button></div></td></tr>`).join("")
+      }
+      document.getElementById("profiles-count").textContent=String(list.length);
+    }
+
+    async function loadProfiles(){
+      setText("profiles-status","Загрузка профилей...");
+      try{
+        const {data,error}=await ensureSB().from("profiles").select("email,display_name,username,phone,email_visibility,updated_at,about,birthday,glow_color").order("updated_at",{ascending:false}).limit(1000);
+        if(error) throw error;
+        profiles=Array.isArray(data)?data:[];
+        renderProfiles(profiles);
+        setText("profiles-status",`Загружено профилей: ${profiles.length}`);
+      }catch(e){setText("profiles-status",`Ошибка загрузки профилей: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    async function quickDeleteProfile(email){
+      if(!email) return;
+      if(!confirm(`Удалить профиль ${email}?`)) return;
+      try{
+        const {error}=await ensureSB().from("profiles").delete().eq("email",email);
+        if(error) throw error;
+        setText("profiles-status","Профиль удален");
+        await loadProfiles();
+      }catch(e){setText("profiles-status",`Ошибка удаления: ${e.message||e}`,"#ffb6b6")}
+    }
+
+    function setupTabs(){
+      document.querySelectorAll(".tab-btn").forEach(btn=>btn.addEventListener("click",()=>{
+        document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+        document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));
+        btn.classList.add("active");
+        const pane=document.getElementById(btn.dataset.pane);
+        if(pane) pane.classList.add("active");
+      }))
+    }
+
+    function setupEvents(){
+      document.getElementById("connect-btn").addEventListener("click",()=>{try{connectSupabase()}catch(e){setText("connect-status",e.message||String(e),"#ffb6b6")}});
+      document.getElementById("save-conn-btn").addEventListener("click",saveConnection);
+
+      document.getElementById("load-collection-btn").addEventListener("click",()=>{void loadCollection()});
+      document.getElementById("refresh-collection-btn").addEventListener("click",()=>{void loadCollection()});
+      document.getElementById("grant-form").addEventListener("submit",e=>{void grantOne(e)});
+      document.getElementById("bulk-form").addEventListener("submit",e=>{void grantBulk(e)});
+      document.getElementById("collection-search").addEventListener("input",()=>renderCollection(collectionItems));
+      document.getElementById("collection-tbody").addEventListener("click",(e)=>{const t=e.target;if(!(t instanceof HTMLElement))return;const cmd=t.dataset.cmd;const id=t.dataset.id;if(cmd==="edit-item"&&id)openItemEdit(id);if(cmd==="del-item"&&id){void deleteItem(id)}});
+      document.getElementById("collection-edit-form").addEventListener("submit",e=>{void saveItemEdit(e)});
+      document.getElementById("close-collection-edit").addEventListener("click",()=>document.getElementById("collection-edit-dialog").close());
+
+      document.getElementById("upsert-profile-btn").addEventListener("click",()=>{void upsertProfile()});
+      document.getElementById("load-profile-btn").addEventListener("click",()=>{void loadOneProfile()});
+      document.getElementById("delete-profile-btn").addEventListener("click",()=>{void deleteProfile()});
+      document.getElementById("load-profiles-btn").addEventListener("click",()=>{void loadProfiles()});
+      document.getElementById("profiles-search").addEventListener("input",()=>renderProfiles(profiles));
+      document.getElementById("profiles-tbody").addEventListener("click",(e)=>{const t=e.target;if(!(t instanceof HTMLElement))return;const cmd=t.dataset.cmd;const email=normEmail(t.dataset.email||"");if(cmd==="pick-profile"){const p=profiles.find(x=>normEmail(x.email)===email);if(p)fillProfileForm(p)}if(cmd==="del-profile"){void quickDeleteProfile(email)}});
+    }
+
+    function init(){
+      const creds=getConfiguredCredentials();
+      document.getElementById("sb-url").value=creds.url;
+      document.getElementById("sb-key").value=creds.key;
+      if(creds.url&&creds.key){try{connectSupabase()}catch(_e){}}
+      setupTabs();
+      setupEvents();
+    }
+
+    document.addEventListener("DOMContentLoaded",init);
+  </script>
+</body>
+</html>
